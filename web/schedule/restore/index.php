@@ -1,7 +1,5 @@
 <?php
 
-use function Hestiacp\quoteshellarg\quoteshellarg;
-
 ob_start();
 
 include $_SERVER["DOCUMENT_ROOT"] . "/inc/main.php";
@@ -9,7 +7,7 @@ include $_SERVER["DOCUMENT_ROOT"] . "/inc/main.php";
 // Check token
 verify_csrf($_GET);
 
-$backup = quoteshellarg($_GET["backup"]);
+$backup = escapeshellarg($_GET["backup"]);
 
 $web = "no";
 $dns = "no";
@@ -19,22 +17,22 @@ $cron = "no";
 $udir = "no";
 
 if ($_GET["type"] == "web") {
-	$web = quoteshellarg($_GET["object"]);
+	$web = escapeshellarg($_GET["object"]);
 }
 if ($_GET["type"] == "dns") {
-	$dns = quoteshellarg($_GET["object"]);
+	$dns = escapeshellarg($_GET["object"]);
 }
 if ($_GET["type"] == "mail") {
-	$mail = quoteshellarg($_GET["object"]);
+	$mail = escapeshellarg($_GET["object"]);
 }
 if ($_GET["type"] == "db") {
-	$db = quoteshellarg($_GET["object"]);
+	$db = escapeshellarg($_GET["object"]);
 }
 if ($_GET["type"] == "cron") {
 	$cron = "yes";
 }
 if ($_GET["type"] == "udir") {
-	$udir = quoteshellarg($_GET["object"]);
+	$udir = escapeshellarg($_GET["object"]);
 }
 
 if (!empty($_GET["type"])) {
@@ -63,7 +61,8 @@ if (!empty($_GET["type"])) {
 exec($restore_cmd, $output, $return_var);
 if ($return_var == 0) {
 	$_SESSION["error_msg"] = _(
-		"Task has been added to the queue. You will receive an email notification when your restore has been completed.",
+		"Task has been added to the queue. " .
+			"You will receive an email notification when your restore has been completed.",
 	);
 } else {
 	$_SESSION["error_msg"] = implode("<br>", $output);

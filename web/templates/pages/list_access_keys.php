@@ -2,12 +2,27 @@
 <div class="toolbar">
     <div class="toolbar-inner">
         <div class="toolbar-buttons">
-            <?php if ($_SESSION["userContext"] === "admin" && $_SESSION['look'] !== '' && $_GET["user"] !== "admin") { ?>
-                <a href="/edit/user/?user=<?= htmlentities($_SESSION["look"]) ?>&token=<?= $_SESSION["token"] ?>" class="button button-secondary button-back js-button-back">
+            <?php
+            $back_href_admin = "/edit/user/?user=" . htmlentities($_SESSION["look"]) . "&token=" . $_SESSION["token"];
+            $back_href_self = "/edit/user/?user=" . htmlentities($_SESSION["user"]) . "&token=" . $_SESSION["token"];
+            ?>
+            <?php
+            $show_admin_back = (
+                ($_SESSION['userContext'] === 'admin') &&
+                ($_SESSION['look'] !== '') &&
+                ($_GET['user'] !== 'admin')
+            );
+            ?>
+            <?php if ($show_admin_back) { ?>
+                <a
+                    href="<?= $back_href_admin ?>"
+                    class="button button-secondary button-back js-button-back">
                     <i class="fas fa-arrow-left icon-blue"></i><?= _("Back") ?>
                 </a>
             <?php } else { ?>
-                <a href="/edit/user/?user=<?= htmlentities($_SESSION["user"]) ?>&token=<?= $_SESSION["token"] ?>" class="button button-secondary button-back js-button-back">
+                <a
+                    href="<?= $back_href_self ?>"
+                    class="button button-secondary button-back js-button-back">
                     <i class="fas fa-arrow-left icon-blue"></i><?= _("Back") ?>
                 </a>
             <?php } ?>
@@ -17,23 +32,30 @@
         </div>
         <div class="toolbar-right">
             <div class="toolbar-sorting">
-                <button class="toolbar-sorting-toggle js-toggle-sorting-menu" type="button" title="<?= _("Sort items") ?>">
+                <button
+                    class="toolbar-sorting-toggle js-toggle-sorting-menu"
+                    type="button"
+                    title="<?= _("Sort items") ?>">
                     <?= _("Sort by") ?>:
                     <span class="u-text-bold">
                         <?= _("Date") ?> <i class="fas fa-arrow-down-a-z"></i>
                     </span>
                 </button>
                 <ul class="toolbar-sorting-menu js-sorting-menu u-hidden">
+                    <?php $date_active = ($_SESSION['userSortOrder'] === 'date') ? 'active' : ''; ?>
                     <li data-entity="sort-date" data-sort-as-int="1">
-                        <span class="name <?php if ($_SESSION['userSortOrder'] === 'date') {
-                            echo 'active';
-                                          } ?>"><?= _("Date") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name <?= $date_active ?>">
+                            <?= _("Date") ?> <i class="fas fa-arrow-down-a-z"></i>
+                        </span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-key">
-                        <span class="name"><?= _("Access Key") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Access Key") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-comment">
-                        <span class="name"><?= _("Comment") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Comment") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                 </ul>
                 <form x-data x-bind="BulkEdit" action="/bulk/access-key/" method="post">
@@ -77,6 +99,13 @@
             //$key_permissions = implode(' ', $key_permissions);
             $key_date = !empty($value['DATE']) ? $value['DATE'] : '-';
             $key_time = !empty($value['TIME']) ? $value['TIME'] : '-';
+
+            $access_key_href = "/list/access-key/?key=" . htmlentities($key) . "&token=" . $_SESSION['token'];
+            $access_key_title = sprintf("%s: %s", _("Access Key"), $key);
+            $delete_href = "/delete/access-key/?key=" . $key . "&token=" . $_SESSION['token'];
+            $delete_title = _("Delete");
+            $delete_msg = sprintf(_("Are you sure you want to delete access key %s?"), $key);
+            $delete_class = 'units-table-row-action-link data-controls js-confirm-action';
             ?>
             <div class="units-table-row js-unit"
                 data-sort-key="<?= strtolower($key) ?>"
@@ -84,26 +113,33 @@
                 data-sort-date="<?= strtotime($data[$key]["DATE"] . " " . $data[$key]["TIME"]) ?>">
                 <div class="units-table-cell">
                     <div>
-                        <input id="check<?= $i ?>" class="js-unit-checkbox" type="checkbox" title="<?= _("Select") ?>" name="key[]" value="<?= $key ?>">
+                        <input
+                            id="check<?= $i ?>"
+                            class="js-unit-checkbox"
+                            type="checkbox"
+                            title="<?= _("Select") ?>"
+                            name="key[]"
+                            value="<?= $key ?>">
                         <label for="check<?= $i ?>" class="u-hide-desktop"><?= _("Select") ?></label>
                     </div>
                 </div>
                 <div class="units-table-cell units-table-heading-cell u-text-bold">
                     <span class="u-hide-desktop"><?= _("Access Key") ?>:</span>
-                    <a href="/list/access-key/?key=<?= htmlentities($key) ?>&token=<?= $_SESSION["token"] ?>" title="<?= _("Access Key") ?>: <?= $key ?>">
-                    <?= $key ?>
+                    <a
+                        href="<?= $access_key_href ?>"
+                        title="<?= $access_key_title ?>">
+                        <?= $key ?>
                     </a>
                 </div>
                 <div class="units-table-cell">
                     <ul class="units-table-row-actions">
                         <li class="units-table-row-action shortcut-delete" data-key-action="js">
                             <a
-                                class="units-table-row-action-link data-controls js-confirm-action"
-                                href="/delete/access-key/?key=<?= $key ?>&token=<?= $_SESSION["token"] ?>"
-                                title="<?= _("Delete") ?>"
-                                data-confirm-title="<?= _("Delete") ?>"
-                                data-confirm-message="<?= sprintf(_("Are you sure you want to delete access key %s?"), $key) ?>"
-                            >
+                                class="<?= $delete_class ?>"
+                                href="<?= $delete_href ?>"
+                                title="<?= $delete_title ?>"
+                                data-confirm-title="<?= $delete_title ?>"
+                                data-confirm-message="<?= $delete_msg ?>">
                                 <i class="fas fa-trash icon-red"></i>
                                 <span class="u-hide-desktop"><?= _("Delete") ?></span>
                             </a>
@@ -112,7 +148,7 @@
                 </div>
                 <div class="units-table-cell u-text-bold u-text-center-desktop">
                     <span class="u-hide-desktop"><?= _("Comment") ?>:</span>
-                <?= _($key_comment) ?>
+                    <?= _($key_comment) ?>
                 </div>
                 <div class="units-table-cell u-text-bold u-text-center-desktop">
                     <span class="u-hide-desktop"><?= _("Date") ?>:</span>
@@ -120,7 +156,7 @@
                 </div>
                 <div class="units-table-cell u-text-bold u-text-center-desktop">
                     <span class="u-hide-desktop"><?= _("Time") ?>:</span>
-                <?= $key_time ?>
+                    <?= $key_time ?>
                 </div>
             </div>
         <?php } ?>

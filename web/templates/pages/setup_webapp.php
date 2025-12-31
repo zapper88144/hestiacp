@@ -2,7 +2,10 @@
 <div class="toolbar">
     <div class="toolbar-inner">
         <div class="toolbar-buttons">
-            <a class="button button-secondary button-back js-button-back" href="/add/webapp/?domain=<?= htmlentities($v_domain) ?>">
+            <?php $add_webapp_back_href = '/add/webapp/?domain=' . htmlentities($v_domain); ?>
+            <a
+                class="button button-secondary button-back js-button-back"
+                href="<?= $add_webapp_back_href ?>">
                 <i class="fas fa-arrow-left icon-blue"></i><?= _("Back") ?>
             </a>
         </div>
@@ -24,15 +27,27 @@
             <input type="hidden" name="ok" value="true">
 
             <div class="form-container">
-                <h1 class="u-mb20"><?= sprintf(_("Install %s"), $WebappInstaller->applicationName()) ?></h1>
+                <?php $install_title = sprintf(_("Install %s"), $WebappInstaller->applicationName()); ?>
+                <h1 class="u-mb20"><?= $install_title ?></h1>
                 <?php show_alert_message($_SESSION); ?>
-                <?php if (!$WebappInstaller->isDomainRootClean()) { ?>
+                <?php if (!$WebappInstaller->isDomainRootClean()) {
+                    $data_loss_warning = _(
+                        "Your web folder already has files uploaded to it. "
+                            . "The installer will overwrite your files and/or the installation might fail."
+                    );
+                    ?>
                     <div class="alert alert-info u-mb10" role="alert">
                         <i class="fas fa-info"></i>
                         <div>
                             <p class="u-mb10"><?= _("Data Loss Warning!") ?></p>
-                            <p class="u-mb10"><?= _("Your web folder already has files uploaded to it. The installer will overwrite your files and/or the installation might fail.") ?></p>
-                            <p><?php echo sprintf(_("Please make sure ~/web/%s/public_html is empty!"), $v_domain); ?></p>
+                            <p class="u-mb10"><?= $data_loss_warning ?></p>
+                            <p><?php
+                                $message = sprintf(
+                                    _("Please make sure ~/web/%s/public_html is empty!"),
+                                    $v_domain
+                                );
+                                echo $message;
+                                ?></p>
                         </div>
                     </div>
                 <?php } ?>
@@ -42,8 +57,8 @@
                     $field_value = "";
                     $field_label =
                         isset($form_control["label"])
-                            ? htmlentities($form_control["label"])
-                            : ucwords(str_replace([".","_"], " ", $form_name));
+                        ? htmlentities($form_control["label"])
+                        : ucwords(str_replace([".", "_"], " ", $form_name));
                     $field_placeholder = "";
                     if (is_array($form_control)) {
                         $field_type = !empty($form_control["type"]) ? $form_control["type"] : "text";
@@ -60,7 +75,11 @@
                             <label for="<?= $field_name ?>" class="form-label">
                                 <?= $field_label ?>
                                 <?php if ($field_type == "password") : ?>
-                                    <button type="button" title="<?= _("Generate") ?>" class="u-unstyled-button u-ml5 js-generate-password">
+                                    <?php $generate_title = _("Generate"); ?>
+                                    <button
+                                        type="button"
+                                        title="<?= $generate_title ?>"
+                                        class="u-unstyled-button u-ml5 js-generate-password">
                                         <i class="fas fa-arrows-rotate icon-green"></i>
                                     </button>
                                 <?php endif; ?>
@@ -71,7 +90,11 @@
                             <select class="form-select" name="<?= $field_name ?>" id="<?= $field_name ?>">
                                 <?php foreach ($form_control["options"] as $key => $option) :
                                     $key = !is_numeric($key) ? $key : $option;
-                                    $selected = (!empty($form_control["value"]) && $key == $form_control["value"]) ? "selected" : ""; ?>
+                                    $selected = '';
+                                    if (!empty($form_control["value"]) && $key == $form_control["value"]) {
+                                        $selected = 'selected';
+                                    }
+                                    ?>
                                     <option value="<?= $key ?>" <?= $selected ?>>
                                         <?= htmlentities($option) ?>
                                     </option>
@@ -86,8 +109,7 @@
                                     name="<?= $field_name ?>"
                                     id="<?= $field_name ?>"
                                     value="true"
-                                    <?= $checked ?>
-                                >
+                                    <?= $checked ?>>
                                 <label for="<?= $field_name ?>">
                                     <?= $field_label ?>
                                 </label>
@@ -100,8 +122,7 @@
                                         class="form-control js-password-input"
                                         name="<?= $field_name ?>"
                                         id="<?= $field_name ?>"
-                                        placeholder="<?= $field_placeholder ?>"
-                                    >
+                                        placeholder="<?= $field_placeholder ?>">
                                     <div class="password-meter">
                                         <meter max="4" class="password-meter-input js-password-meter"></meter>
                                     </div>
@@ -113,8 +134,7 @@
                                     name="<?= $field_name ?>"
                                     id="<?= $field_name ?>"
                                     placeholder="<?= $field_placeholder ?>"
-                                    value="<?= $field_value ?>"
-                                >
+                                    value="<?= $field_value ?>">
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>

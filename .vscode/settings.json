@@ -1,7 +1,7 @@
 {
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"[php]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
+		"editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
 	},
 	// Optional nesting patterns, set explorer.fileNesting.enabled to true to enable
 	"explorer.fileNesting.patterns": {
@@ -12,5 +12,7 @@
 	},
 	"[javascript]": {
 		"editor.defaultFormatter": "biomejs.biome"
-	}
+	},
+	"intelephense.environment.includePaths": ["./web/inc/vendor", "./web/src/vendor"],
+	"intelephense.maxMemory": 2048
 }

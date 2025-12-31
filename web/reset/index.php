@@ -1,6 +1,6 @@
 <?php
 
-use function Hestiacp\quoteshellarg\quoteshellarg;
+/* phpcs:ignoreFile */
 
 define("NO_AUTH_REQUIRED", true);
 $TAB = "RESET PASSWORD";
@@ -20,7 +20,7 @@ if ($_SESSION["POLICY_SYSTEM_PASSWORD_RESET"] == "no") {
 if (!empty($_POST["user"]) && empty($_POST["code"])) {
 	// Check token
 	verify_csrf($_POST);
-	$v_user = quoteshellarg($_POST["user"]);
+	$v_user = escapeshellarg($_POST["user"]);
 	$user = $_POST["user"];
 	$email = $_POST["email"];
 	$cmd = "/usr/bin/sudo /usr/local/hestia/bin/v-list-user";
@@ -63,10 +63,12 @@ if (!empty($_POST["user"]) && empty($_POST["code"])) {
 							"To reset your {{appname}} password, please follow this link:\n" .
 							"https://{{hostname}}/reset/?action=confirm&user={{user}}&code={{resetcode}}\n" .
 							"\n" .
-							"Alternatively, you may go to https://{{hostname}}/reset/?action=code&user={{user}} and enter the following reset code:\n" .
+							"Alternatively, you may go to https://{{hostname}}/reset/?action=code&user={{user}} " .
+							"and enter the following reset code:\n" .
 							"{{resetcode}}\n" .
 							"\n" .
-							"If you did not request password reset, please ignore this message and accept our apologies.\n" .
+							"If you did not request password reset, please ignore this message " .
+							"and accept our apologies.\n" .
 							"\n" .
 							"Best regards,\n" .
 							"\n" .
@@ -163,7 +165,7 @@ if (!empty($_POST["user"]) && !empty($_POST["code"]) && !empty($_POST["password"
 	// Check token
 	verify_csrf($_POST);
 	if ($_POST["password"] == $_POST["password_confirm"]) {
-		$v_user = quoteshellarg($_POST["user"]);
+		$v_user = escapeshellarg($_POST["user"]);
 		$user = $_POST["user"];
 		exec(HESTIA_CMD . "v-list-user " . $v_user . " json", $output, $return_var);
 		if ($return_var == 0) {

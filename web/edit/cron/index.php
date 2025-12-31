@@ -1,7 +1,5 @@
 <?php
 
-use function Hestiacp\quoteshellarg\quoteshellarg;
-
 ob_start();
 $TAB = "CRON";
 
@@ -9,17 +7,17 @@ include $_SERVER["DOCUMENT_ROOT"] . "/inc/main.php";
 
 // Edit as someone else?
 if ($_SESSION["userContext"] === "admin" && !empty($_GET["user"])) {
-	$user = quoteshellarg($_GET["user"]);
+    $user = escapeshellarg($_GET["user"]);
 }
 
 // Check job id
 if (empty($_GET["job"])) {
-	header("Location: /list/cron/");
-	exit();
+    header("Location: /list/cron/");
+    exit();
 }
 
 // List cron job
-$v_job = quoteshellarg($_GET["job"]);
+$v_job = escapeshellarg($_GET["job"]);
 exec(HESTIA_CMD . "v-list-cron-job " . $user . " " . $v_job . " 'json'", $output, $return_var);
 check_return_code_redirect($return_var, $output, "/list/cron/");
 
@@ -39,56 +37,56 @@ $v_date = $data[$v_job]["DATE"];
 $v_time = $data[$v_job]["TIME"];
 $v_suspended = $data[$v_job]["SUSPENDED"];
 if ($v_suspended == "yes") {
-	$v_status = "suspended";
+    $v_status = "suspended";
 } else {
-	$v_status = "active";
+    $v_status = "active";
 }
 
 // Check POST request
 if (!empty($_POST["save"])) {
-	// Check token
-	verify_csrf($_POST);
+    // Check token
+    verify_csrf($_POST);
 
-	$v_username = $user;
-	$v_job = quoteshellarg($_GET["job"]);
-	$v_min = quoteshellarg($_POST["v_min"]);
-	$v_hour = quoteshellarg($_POST["v_hour"]);
-	$v_day = quoteshellarg($_POST["v_day"]);
-	$v_month = quoteshellarg($_POST["v_month"]);
-	$v_wday = quoteshellarg($_POST["v_wday"]);
-	$v_cmd = quoteshellarg($_POST["v_cmd"]);
+    $v_username = $user;
+    $v_job = escapeshellarg($_GET["job"]);
+    $v_min = escapeshellarg($_POST["v_min"]);
+    $v_hour = escapeshellarg($_POST["v_hour"]);
+    $v_day = escapeshellarg($_POST["v_day"]);
+    $v_month = escapeshellarg($_POST["v_month"]);
+    $v_wday = escapeshellarg($_POST["v_wday"]);
+    $v_cmd = escapeshellarg($_POST["v_cmd"]);
 
-	// Save changes
-	exec(
-		HESTIA_CMD .
-			"v-change-cron-job " .
-			$user .
-			" " .
-			$v_job .
-			" " .
-			$v_min .
-			" " .
-			$v_hour .
-			" " .
-			$v_day .
-			" " .
-			$v_month .
-			" " .
-			$v_wday .
-			" " .
-			$v_cmd,
-		$output,
-		$return_var,
-	);
-	check_return_code($return_var, $output);
-	unset($output);
+    // Save changes
+    exec(
+        HESTIA_CMD .
+            "v-change-cron-job " .
+            $user .
+            " " .
+            $v_job .
+            " " .
+            $v_min .
+            " " .
+            $v_hour .
+            " " .
+            $v_day .
+            " " .
+            $v_month .
+            " " .
+            $v_wday .
+            " " .
+            $v_cmd,
+        $output,
+        $return_var,
+    );
+    check_return_code($return_var, $output);
+    unset($output);
 
-	$v_cmd = $_POST["v_cmd"];
+    $v_cmd = $_POST["v_cmd"];
 
-	// Set success message
-	if (empty($_SESSION["error_msg"])) {
-		$_SESSION["ok_msg"] = _("Changes have been saved.");
-	}
+    // Set success message
+    if (empty($_SESSION["error_msg"])) {
+        $_SESSION["ok_msg"] = _("Changes have been saved.");
+    }
 }
 
 // Get current system time

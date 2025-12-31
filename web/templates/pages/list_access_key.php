@@ -28,18 +28,34 @@ if (!empty($_POST["ok"])) { ?>
             <?php show_alert_message($_SESSION); ?>
             <?php if (!empty($key_data["ACCESS_KEY_ID"])) { ?>
                 <div class="u-mt15 u-mb10">
+                    <?php $access_key_id_val = htmlentities(trim($key_data['ACCESS_KEY_ID'], "'")); ?>
                     <label for="access_key_id" class="form-label"><?= _("Access Key ID") ?></label>
-                    <input type="text" class="form-control" id="access_key_id" maxlength="255" readonly value="<?= htmlentities(trim($key_data["ACCESS_KEY_ID"], "'")) ?>">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="access_key_id"
+                        maxlength="255"
+                        readonly
+                        value="<?= $access_key_id_val ?>">
                 </div>
             <?php } ?>
             <?php if (!empty($_SESSION["ok_msg"])) { ?>
                 <?php if (!empty($key_data["ACCESS_KEY_ID"]) && !empty($key_data["SECRET_ACCESS_KEY"])) { ?>
                     <div class="u-mb20">
                         <label for="secret_key" class="form-label">
-                            <?= _("Secret Key") ?><br>
-                            <span class="inline-alert inline-alert-warning u-mb20"><?= _("Warning! Last chance to save secret key!") ?></span>
+                            <?= _("Secret Key") ?>
+                            <br>
+                            <?php $secret_warning = _("Warning! Last chance to save secret key!"); ?>
+                            <span class="inline-alert inline-alert-warning u-mb20"><?= $secret_warning ?></span>
                         </label>
-                        <input type="text" class="form-control" id="secret_key" maxlength="255" readonly value="<?= htmlentities(trim($key_data["SECRET_ACCESS_KEY"], "'")) ?>">
+                        <?php $secret_key_val = htmlentities(trim($key_data['SECRET_ACCESS_KEY'], "'")); ?>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="secret_key"
+                            maxlength="255"
+                            readonly
+                            value="<?= $secret_key_val ?>">
                     </div>
                 <?php } ?>
             <?php } ?>
@@ -50,8 +66,15 @@ if (!empty($_POST["ok"])) { ?>
                 <?php } ?>
             </ul>
             <div class="u-mb10">
+                <?php $comment_val = htmlentities(trim($key_data['COMMENT'], "'")); ?>
                 <label for="service" class="form-label"><?= _("Comment") ?></label>
-                <input type="text" class="form-control" id="service" maxlength="255" readonly value="<?= htmlentities(trim($key_data["COMMENT"], "'")) ?>">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="service"
+                    maxlength="255"
+                    readonly
+                    value="<?= $comment_val ?>">
             </div>
         </div>
 

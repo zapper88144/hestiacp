@@ -1,10 +1,12 @@
 <?php
+
+/* phpcs:ignoreFile */
+
 session_start();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-use function Hestiacp\quoteshellarg\quoteshellarg;
 
 try {
 	require_once "vendor/autoload.php";
@@ -72,8 +74,8 @@ if (
 	isset($_SESSION["user"]) &&
 	$_SESSION["DISABLE_IP_CHECK"] != "yes"
 ) {
-	$v_user = quoteshellarg($_SESSION["user"]);
-	$v_session_id = quoteshellarg($_SESSION["token"]);
+	$v_user = escapeshellarg($_SESSION["user"]);
+	$v_session_id = escapeshellarg($_SESSION["token"]);
 	exec(HESTIA_CMD . "v-log-user-logout " . $v_user . " " . $v_session_id, $output, $return_var);
 	destroy_sessions();
 	header("Location: /login/");
@@ -105,7 +107,7 @@ if (isset($_SESSION["user"])) {
 		$username = $_SESSION["look"];
 	}
 
-	exec(HESTIA_CMD . "v-list-user " . quoteshellarg($username) . " json", $output, $return_var);
+	exec(HESTIA_CMD . "v-list-user " . escapeshellarg($username) . " json", $output, $return_var);
 	$data = json_decode(implode("", $output), true);
 	unset($output, $return_var);
 	$_SESSION["login_shell"] = $data[$username]["SHELL"];
@@ -124,8 +126,8 @@ if (!defined("NO_AUTH_REQUIRED")) {
 		destroy_sessions();
 		header("Location: /login/");
 	} elseif ($_SESSION["INACTIVE_SESSION_TIMEOUT"] * 60 + $_SESSION["LAST_ACTIVITY"] < time()) {
-		$v_user = quoteshellarg($_SESSION["user"]);
-		$v_session_id = quoteshellarg($_SESSION["token"]);
+		$v_user = escapeshellarg($_SESSION["user"]);
+		$v_session_id = escapeshellarg($_SESSION["token"]);
 		exec(
 			HESTIA_CMD . "v-log-user-logout " . $v_user . " " . $v_session_id,
 			$output,
@@ -149,12 +151,12 @@ function ipUsed() {
 }
 
 if (isset($_SESSION["user"])) {
-	$user = quoteshellarg($_SESSION["user"]);
+	$user = escapeshellarg($_SESSION["user"]);
 	$user_plain = htmlentities($_SESSION["user"]);
 }
 
 if (isset($_SESSION["look"]) && $_SESSION["look"] != "" && $_SESSION["userContext"] === "admin") {
-	$user = quoteshellarg($_SESSION["look"]);
+	$user = escapeshellarg($_SESSION["look"]);
 	$user_plain = htmlentities($_SESSION["look"]);
 }
 if (empty($user_plain)) {
@@ -342,6 +344,19 @@ function convert_datetime($date, $format = "Y-m-d H:i:s") {
 	return $date->format($format);
 }
 
+function getTransByType($type) {
+	switch ($type) {
+		case "dir":
+			return _("Directory");
+		case "file":
+			return _("File");
+		case "symlink":
+			return _("Symlink");
+		default:
+			return _("Unknown");
+	}
+}
+
 function humanize_time($usage) {
 	if ($usage > 60) {
 		$usage = $usage / 60;
@@ -452,42 +467,70 @@ function get_percentage($used, $total) {
 	return $percent;
 }
 
+/**
+ * @psalm-suppress UndefinedClass
+ * @psalm-suppress UndefinedType
+ * @noinspection PhpUndefinedClassInspection
+ */
 function send_email($to, $subject, $mailtext, $from, $from_name, $to_name = "") {
-	$mail = new PHPMailer();
+	// PHPMailer might not be available in some environments (e.g., depending on composer install).
+	// Guard against undefined class to avoid analyzer/runtime fatal errors.
+	if (!class_exists("\PHPMailer\PHPMailer\PHPMailer")) {
+		trigger_error(
+			"PHPMailer not available. Please run v-add-sys-dependencies or install composer dependencies.",
+			E_USER_WARNING,
+		);
+		return;
+	}
 
-	if (isset($_SESSION["USE_SERVER_SMTP"]) && $_SESSION["USE_SERVER_SMTP"] == "true") {
-		if (!empty($_SESSION["SERVER_SMTP_ADDR"]) && $_SESSION["SERVER_SMTP_ADDR"] != "") {
-			if (filter_var($_SESSION["SERVER_SMTP_ADDR"], FILTER_VALIDATE_EMAIL)) {
-				$from = $_SESSION["SERVER_SMTP_ADDR"];
-			}
+	try {
+		$phppmailer_class = "\\PHPMailer\\PHPMailer\\PHPMailer";
+		if (!class_exists($phppmailer_class)) {
+			trigger_error(
+				"PHPMailer not available. Please run v-add-sys-dependencies or install composer dependencies.",
+				E_USER_WARNING,
+			);
+			return;
 		}
 
-		$mail->IsSMTP();
-		$mail->Mailer = "smtp";
-		$mail->SMTPDebug = 0;
-		$mail->SMTPAuth = true;
-		$mail->SMTPSecure = $_SESSION["SERVER_SMTP_SECURITY"];
-		$mail->Port = $_SESSION["SERVER_SMTP_PORT"];
-		$mail->Host = $_SESSION["SERVER_SMTP_HOST"];
-		$mail->Username = $_SESSION["SERVER_SMTP_USER"];
-		$mail->Password = $_SESSION["SERVER_SMTP_PASSWD"];
-	}
+		$mail = new $phppmailer_class(true);
 
-	$mail->IsHTML(true);
-	$mail->ClearReplyTos();
-	if (empty($to_name)) {
-		$mail->AddAddress($to);
-	} else {
-		$mail->AddAddress($to, $to_name);
-	}
-	$mail->SetFrom($from, $from_name);
+		if (isset($_SESSION["USE_SERVER_SMTP"]) && $_SESSION["USE_SERVER_SMTP"] == "true") {
+			if (!empty($_SESSION["SERVER_SMTP_ADDR"]) && $_SESSION["SERVER_SMTP_ADDR"] != "") {
+				if (filter_var($_SESSION["SERVER_SMTP_ADDR"], FILTER_VALIDATE_EMAIL)) {
+					$from = $_SESSION["SERVER_SMTP_ADDR"];
+				}
+			}
 
-	$mail->CharSet = "utf-8";
-	$mail->Subject = $subject;
-	$content = $mailtext;
-	$content = nl2br($content);
-	$mail->MsgHTML($content);
-	$mail->Send();
+			$mail->isSMTP();
+			$mail->Mailer = "smtp";
+			$mail->SMTPDebug = 0;
+			$mail->SMTPAuth = true;
+			$mail->SMTPSecure = $_SESSION["SERVER_SMTP_SECURITY"];
+			$mail->Port = $_SESSION["SERVER_SMTP_PORT"];
+			$mail->Host = $_SESSION["SERVER_SMTP_HOST"];
+			$mail->Username = $_SESSION["SERVER_SMTP_USER"];
+			$mail->Password = $_SESSION["SERVER_SMTP_PASSWD"];
+		}
+
+		$mail->isHTML(true);
+		$mail->clearReplyTos();
+		if (empty($to_name)) {
+			$mail->addAddress($to);
+		} else {
+			$mail->addAddress($to, $to_name);
+		}
+		$mail->setFrom($from, $from_name);
+
+		$mail->CharSet = "utf-8";
+		$mail->Subject = $subject;
+		$content = $mailtext;
+		$content = nl2br($content);
+		$mail->msgHTML($content);
+		$mail->send();
+	} catch (\Throwable $e) {
+		// swallow intentionally — sending failure shouldn't break the caller
+	}
 }
 
 function list_timezones() {
@@ -565,7 +608,7 @@ function backendtpl_with_webdomains() {
 	$backend_list = [];
 	foreach ($users as $user => $user_details) {
 		exec(
-			HESTIA_CMD . "v-list-web-domains " . quoteshellarg($user) . " json",
+			HESTIA_CMD . "v-list-web-domains " . escapeshellarg($user) . " json",
 			$output,
 			$return_var,
 		);

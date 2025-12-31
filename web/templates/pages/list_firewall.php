@@ -2,24 +2,33 @@
 <div class="toolbar">
     <div class="toolbar-inner">
         <div class="toolbar-buttons">
-            <a class="button button-secondary button-back js-button-back" href="/list/server/">
+            <a
+                class="button button-secondary button-back js-button-back"
+                href="/list/server/">
                 <i class="fas fa-arrow-left icon-blue"></i><?= _("Back") ?>
             </a>
             <a href="/add/firewall/" class="button button-secondary js-button-create">
                 <i class="fas fa-circle-plus icon-green"></i><?= _("Add Rule") ?>
             </a>
             <?php if (!empty($_SESSION["FIREWALL_EXTENSION"])) : ?>
-                <a class="button button-secondary" href="/list/firewall/banlist/">
+                <a
+                    class="button button-secondary"
+                    href="/list/firewall/banlist/">
                     <i class="fas fa-eye icon-red"></i><?= _("Banned IP Addresses") ?>
                 </a>
             <?php endif; ?>
-            <a class="button button-secondary" href="/list/firewall/ipset/">
+            <a
+                class="button button-secondary"
+                href="/list/firewall/ipset/">
                 <i class="fas fa-list icon-blue"></i><?= _("IPset IP Lists") ?>
             </a>
         </div>
         <div class="toolbar-right">
             <div class="toolbar-sorting">
-                <button class="toolbar-sorting-toggle js-toggle-sorting-menu" type="button" title="<?= _("Sort items") ?>">
+                <button
+                    class="toolbar-sorting-toggle js-toggle-sorting-menu"
+                    type="button"
+                    title="<?= _("Sort items") ?>">
                     <?= _("Sort by") ?>:
                     <span class="u-text-bold">
                         <?= _("Action") ?> <i class="fas fa-arrow-up-a-z"></i>
@@ -27,19 +36,24 @@
                 </button>
                 <ul class="toolbar-sorting-menu js-sorting-menu u-hidden">
                     <li data-entity="sort-action">
-                        <span class="name"><?= _("Action") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up active"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Action") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up active"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-protocol">
-                        <span class="name"><?= _("Protocol") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Protocol") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-port">
-                        <span class="name"><?= _("Port") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Port") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-ip" data-sort-as-int="1">
-                        <span class="name"><?= _("IP Address") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("IP Address") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                     <li data-entity="sort-comment">
-                        <span class="name"><?= _("Comment") ?> <i class="fas fa-arrow-down-a-z"></i></span><span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
+                        <span class="name"><?= _("Comment") ?> <i class="fas fa-arrow-down-a-z"></i></span>
+                        <span class="up"><i class="fas fa-arrow-up-a-z"></i></span>
                     </li>
                 </ul>
                 <form x-data x-bind="BulkEdit" action="/bulk/firewall/" method="post">
@@ -96,18 +110,31 @@
                 $spnd_action_title = _('Unsuspend');
                 $spnd_icon = 'fa-play';
                 $spnd_icon_class = 'icon-green';
-                $spnd_confirmation = _('Are you sure you want to unsuspend rule #%s?') ;
+                $spnd_confirmation = _('Are you sure you want to unsuspend rule #%s?');
             } else {
                 $status = 'active';
                 $spnd_action = 'suspend';
                 $spnd_action_title = _('Suspend');
                 $spnd_icon = 'fa-pause';
                 $spnd_icon_class = 'icon-highlight';
-                $spnd_confirmation = _('Are you sure you want to suspend rule #%s?') ;
+                $spnd_confirmation = _('Are you sure you want to suspend rule #%s?');
             }
             ?>
+            <?php
+            $move_up_style   = $move_up_enabled ? 'display:block!important' : 'display:none!important';
+            $move_down_style = $move_down_enabled ? '' : 'display:block!important';
+            $move_up_href    = '/move/firewall/?rule=' . $key . '&direction=up&token=' . $_SESSION['token'];
+            $move_down_href  = '/move/firewall/?rule=' . $key . '&direction=down&token=' . $_SESSION['token'];
+            $edit_href       = '/edit/firewall/?rule=' . $key . '&token=' . $_SESSION['token'];
+            $spnd_href       = '/' . $spnd_action . '/firewall/?rule=' . $key . '&token=' . $_SESSION['token'];
+            $delete_href     = '/delete/firewall/?rule=' . $key . '&token=' . $_SESSION['token'];
+            $move_up_confirm_message = sprintf(_("Are you sure you want to move rule #%s up?"), $key);
+            $move_down_confirm_message = sprintf(_("Are you sure you want to move rule #%s down?"), $key);
+            $delete_confirm_message = sprintf(_("Are you sure you want to delete rule #%s?"), $key);
+
+            ?>
             <div class="units-table-row <?php if ($status == 'suspended') {
-                echo 'disabled';
+                                            echo 'disabled';
                                         } ?> js-unit"
                 data-sort-action="<?= $data[$key]['ACTION'] ?>"
                 data-sort-protocol="<?= $data[$key]['PROTOCOL'] ?>"
@@ -116,17 +143,21 @@
                 data-sort-comment="<?= $data[$key]['COMMENT'] ?>">
                 <div class="units-table-cell">
                     <div>
-                        <input id="check<?= $i ?>" class="js-unit-checkbox" type="checkbox" title="<?= _("Select") ?>" name="rule[]" value="<?= $key ?>">
+                        <input
+                            id="check<?= $i ?>"
+                            class="js-unit-checkbox"
+                            type="checkbox"
+                            title="<?= _("Select") ?>"
+                            name="rule[]"
+                            value="<?= $key ?>">
                         <label for="check<?= $i ?>" class="u-hide-desktop"><?= _("Select") ?></label>
                     </div>
                 </div>
                 <div class="units-table-cell units-table-heading-cell u-text-bold">
                     <span class="u-hide-desktop"><?= _("Position") ?>:</span>
-                    <a href="/edit/firewall/?rule=<?= $key ?>&token=<?= $_SESSION["token"] ?>" title="<?= _("Edit Firewall Rule") ?>">
-                    <?php
-                        $rule = $key;
-                    ?>
-                    <?= $rule ?>
+                    <a href="<?= $edit_href ?>" title="<?= _("Edit Firewall Rule") ?>">
+                        <?php $rule = $key; ?>
+                        <?= $rule ?>
                     </a>
                 </div>
                 <div class="units-table-cell" style="padding-left: 0;padding-right: 0;">
@@ -134,11 +165,11 @@
                         <li class="units-table-row-action shortcut-up" data-key-action="js">
                             <a
                                 class="units-table-row-action-link data-controls js-confirm-action"
-                                style="<?= $move_up_enabled ? "display:block!important" : "display:none!important" ?>"
-                                href="/move/firewall/?rule=<?= $key ?>&direction=up&token=<?= $_SESSION["token"] ?>"
+                                style="<?= $move_up_style ?>"
+                                href="<?= $move_up_href ?>"
                                 title="<?= _("Move Firewall Rule Up") ?>"
                                 data-confirm-title="<?= _("Move Up") ?>"
-                                data-confirm-message="<?= sprintf(_("Are you sure you want to move rule #%s up?"), $key) ?>">
+                                data-confirm-message="<?= $move_up_confirm_message ?>">
                                 <i class="fas fa-arrow-up icon-blue"></i>
                                 <span class="u-hide-desktop"><?= _("Move Firewall Rule Up") ?></span>
                             </a>
@@ -146,11 +177,11 @@
                         <li class="units-table-row-action shortcut-down" data-key-action="js">
                             <a
                                 class="units-table-row-action-link data-controls js-confirm-action"
-                                style="<?= $move_down_enabled ? "" : "display:block!important" ?>"
-                                href="/move/firewall/?rule=<?= $key ?>&direction=down&token=<?= $_SESSION["token"] ?>"
+                                style="<?= $move_down_style ?>"
+                                href="<?= $move_down_href ?>"
                                 title="<?= _("Move Firewall Rule Down") ?>"
                                 data-confirm-title="<?= _("Move Down") ?>"
-                                data-confirm-message="<?= sprintf(_("Are you sure you want to move rule #%s down?"), $key) ?>">
+                                data-confirm-message="<?= $move_down_confirm_message ?>">
                                 <i class="fas fa-arrow-down icon-blue"></i>
                                 <span class="u-hide-desktop"><?= _("Move Firewall Rule Down") ?></span>
                             </a>
@@ -159,7 +190,9 @@
                 </div>
                 <div class="units-table-cell units-table-heading-cell u-text-bold">
                     <span class="u-hide-desktop"><?= _("Action") ?>:</span>
-                    <a href="/edit/firewall/?rule=<?= $key ?>&token=<?= $_SESSION["token"] ?>" title="<?= _("Edit Firewall Rule") ?>">
+                    <a
+                        href="<?= $edit_href ?>"
+                        title="<?= _("Edit Firewall Rule") ?>">
                         <?php
                         $suspended = $data[$key]["SUSPENDED"] == "no";
                         $action = $data[$key]["ACTION"];
@@ -174,9 +207,8 @@
                         <li class="units-table-row-action shortcut-enter" data-key-action="href">
                             <a
                                 class="units-table-row-action-link"
-                                href="/edit/firewall/?rule=<?= $key ?>&token=<?= $_SESSION["token"] ?>"
-                                title="<?= _("Edit Firewall Rule") ?>"
-                            >
+                                href="<?= $edit_href ?>"
+                                title="<?= _("Edit Firewall Rule") ?>">
                                 <i class="fas fa-pencil icon-orange"></i>
                                 <span class="u-hide-desktop"><?= _("Edit Firewall Rule") ?></span>
                             </a>
@@ -184,11 +216,10 @@
                         <li class="units-table-row-action shortcut-s" data-key-action="js">
                             <a
                                 class="units-table-row-action-link data-controls js-confirm-action"
-                                href="/<?= $spnd_action ?>/firewall/?rule=<?= $key ?>&token=<?= $_SESSION["token"] ?>"
+                                href="<?= $spnd_href ?>"
                                 title="<?= $spnd_action_title ?>"
                                 data-confirm-title="<?= $spnd_action_title ?>"
-                                data-confirm-message="<?= sprintf($spnd_confirmation, $key) ?>"
-                            >
+                                data-confirm-message="<?= sprintf($spnd_confirmation, $key) ?>">
                                 <i class="fas <?= $spnd_icon ?> <?= $spnd_icon_class ?>"></i>
                                 <span class="u-hide-desktop"><?= $spnd_action_title ?></span>
                             </a>
@@ -196,11 +227,10 @@
                         <li class="units-table-row-action shortcut-delete" data-key-action="js">
                             <a
                                 class="units-table-row-action-link data-controls js-confirm-action"
-                                href="/delete/firewall/?rule=<?= $key ?>&token=<?= $_SESSION["token"] ?>"
+                                href="<?= $delete_href ?>"
                                 title="<?= _("Delete") ?>"
                                 data-confirm-title="<?= _("Delete") ?>"
-                                data-confirm-message="<?= sprintf(_("Are you sure you want to delete rule #%s?"), $key) ?>"
-                            >
+                                data-confirm-message="<?= $delete_confirm_message ?>">
                                 <i class="fas fa-trash icon-red"></i>
                                 <span class="u-hide-desktop"><?= _("Delete") ?></span>
                             </a>
@@ -215,15 +245,15 @@
                 </div>
                 <div class="units-table-cell u-text-center-desktop">
                     <span class="u-hide-desktop u-text-bold"><?= _("Protocol") ?>:</span>
-                <?= _($data[$key]["PROTOCOL"]) ?>
+                    <?= _($data[$key]["PROTOCOL"]) ?>
                 </div>
                 <div class="units-table-cell u-text-bold u-text-center-desktop">
                     <span class="u-hide-desktop"><?= _("Port") ?>:</span>
-                <?= $data[$key]["PORT"] ?>
+                    <?= $data[$key]["PORT"] ?>
                 </div>
                 <div class="units-table-cell u-text-center-desktop">
                     <span class="u-hide-desktop u-text-bold"><?= _("IP Address") ?>:</span>
-                <?= $data[$key]["IP"] ?>
+                    <?= $data[$key]["IP"] ?>
                 </div>
             </div>
         <?php } ?>

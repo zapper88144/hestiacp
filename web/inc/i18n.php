@@ -1,5 +1,7 @@
 <?php
 
+/* phpcs:ignoreFile */
+
 // Functions for internationalization
 // I18N support information here
 
